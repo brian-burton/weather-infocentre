@@ -1,6 +1,19 @@
-import inkyphat, requests, sys, metofficekey
-from PIL import ImageFont
+#!/usr/bin/python3
+
+# import inkyphat, requests, sys, metofficekey
+import requests, sys, os
+import metofficekey_bb as metofficekey
+from inky import InkyPHAT
+from font_fredoka_one import FredokaOne
+from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
+
+# Varables and devices
+
+inkyphat = InkyPHAT('red')
+image = Image.new("P", inkyphat.resolution)
+draw = ImageDraw.Draw(image)
+os.chdir(os.path.dirname(sys.argv[0]))
 
 ##### Function defs #####
 
@@ -35,13 +48,12 @@ def buildWeatherTypes() -> list:
 
 DATAPOINT_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/" + metofficekey.LOCATION + "?res=3hourly&key=" + metofficekey.APIKEY
 DOMOTICZ_URL = 'http://domoticz/json.htm'
-
 OUTDOOR_THERMO_ID = "452"
 INDOOR_THERMO_ID = "223"
 
-SMALL_FONT = ImageFont.truetype(inkyphat.fonts.FredokaOne, 14)
-MED_FONT = ImageFont.truetype(inkyphat.fonts.FredokaOne, 28)
-LARGE_FONT = ImageFont.truetype(inkyphat.fonts.FredokaOne, 35)
+SMALL_FONT = ImageFont.truetype(FredokaOne, 14)
+MED_FONT = ImageFont.truetype(FredokaOne, 28)
+LARGE_FONT = ImageFont.truetype(FredokaOne, 35)
 WEATHER_FONT = ImageFont.truetype("Font Awesome 5 Free-Solid-900.otf", 20)
 
 IN_TEXT = "In"
@@ -58,10 +70,14 @@ HOUR_IN_MINS = datetime.now().hour * 60
 # code corresponds to the weather type, W, returned by the API.
 WEATHERTYPE = buildWeatherTypes()
 
+
+########## The code itself
+
 try:
   maxWidth = 0
-  inkyphat.rectangle([(0,0),(211,103)],inkyphat.WHITE)
-  inkyphat.set_border(inkyphat.RED)
+  draw.rectangle([(0,0),(211,103)],inkyphat.WHITE)
+  draw.rectangle([(1,1),(210,102)],inkyphat.RED)
+  draw.rectangle([(2,2),(209,101)], inkyphat.WHITE)
 
   try:
     inData = requests.get(DOMOTICZ_URL + '?type=devices&rid=' + INDOOR_THERMO_ID).json()['result'][0]
@@ -107,18 +123,19 @@ try:
   hum_text_x = 211 - hum_w_max - 3
   out_hum_text_y = 3
 
-  inkyphat.text((in_text_x,in_text_y), IN_TEXT, inkyphat.BLACK, SMALL_FONT)
-  inkyphat.text((temp_text_x, in_temp_text_y), IN_TEMP_TEXT, inkyphat.BLACK, LARGE_FONT)
-  inkyphat.text((out_text_x, out_text_y), OUT_TEXT, inkyphat.BLACK, SMALL_FONT)
-  inkyphat.text((temp_text_x, out_text_y), OUT_TEMP_TEXT, inkyphat.BLACK, LARGE_FONT)
-  inkyphat.text((hum_text_x, in_text_y), IN_HUM_TEXT, inkyphat.BLACK, MED_FONT)
-  inkyphat.text((hum_text_x, out_text_y), OUT_HUM_TEXT, inkyphat.BLACK, MED_FONT)
+  draw.text((in_text_x,in_text_y), IN_TEXT, inkyphat.BLACK, SMALL_FONT)
+  draw.text((temp_text_x, in_temp_text_y), IN_TEMP_TEXT, inkyphat.BLACK, LARGE_FONT)
+  draw.text((out_text_x, out_text_y), OUT_TEXT, inkyphat.BLACK, SMALL_FONT)
+  draw.text((temp_text_x, out_text_y), OUT_TEMP_TEXT, inkyphat.BLACK, LARGE_FONT)
+  draw.text((hum_text_x, in_text_y), IN_HUM_TEXT, inkyphat.BLACK, MED_FONT)
+  draw.text((hum_text_x, out_text_y), OUT_HUM_TEXT, inkyphat.BLACK, MED_FONT)
   weatherString = ""
   for entry in weatherData:
     weatherString += WEATHERTYPE[int(entry['W'])]['text']
   WTH_TEXT_W, WTH_TEXT_H = WEATHER_FONT.getsize(weatherString)
-  inkyphat.text((3, 103 - WTH_TEXT_H - 3), weatherString, inkyphat.RED, WEATHER_FONT)
+  draw.text((3, 103 - WTH_TEXT_H - 3), weatherString, inkyphat.RED, WEATHER_FONT)
 
+  inkyphat.set_image(image)
   inkyphat.show()
 
 except requests.exceptions.RequestException as err:

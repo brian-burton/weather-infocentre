@@ -1,0 +1,13 @@
+[Unit]
+Description=BME680 Sensor Service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /home/pi/git/weather-infocentre/infocentre.bme680.py
+WorkingDirectory=/home/pi/git/weather-infocentre
+User=pi
+
+[Install]
+WantedBy=multi-user.target
