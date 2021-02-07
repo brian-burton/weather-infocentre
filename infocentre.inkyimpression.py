@@ -79,8 +79,8 @@ TEXT_FONT_62 = ImageFont.truetype("NotoSansJP-Regular.otf", 62)
 
 # Pre-drawn background and top layer images
 
-BASE_IMAGE = sys.argv[0] + "/images/weather-infocentre-background.png"
-OVERLAY_IMAGE = sys.argv[0] + "/images/weather-infocentre-overlay.png"
+BASE_IMAGE = os.path.dirname(sys.argv[0]) + "/images/weather-infocentre-background.png"
+OVERLAY_IMAGE = os.path.dirname(sys.argv[0]) + "/images/weather-infocentre-overlay.png"
 
 # Known positions and custom colours of calculated text element
 
