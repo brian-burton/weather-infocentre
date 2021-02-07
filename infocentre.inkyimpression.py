@@ -94,6 +94,17 @@ JPY_ARROW_POS = (556, 368)
 GBP_ARROW_POS = (556, 406)
 HUGE_WEATHER_COLOUR = (190, 190, 255)
 
+PALETTE = [
+    (0, 0, 0),
+    (255, 255, 255),
+    (0, 255, 0),
+    (0, 0, 255),
+    (255, 0, 0),
+    (255, 255, 0),
+    (255, 140, 0),
+    (255, 255, 255)
+]
+
 # Script run time
 
 TIMENOW = str(datetime.now().time()).split(".")[0]
@@ -107,7 +118,7 @@ WEATHERTYPE = buildWeatherTypes()
 # Varables and devices
 
 inky = Inky()
-image = Image.new("RGB", (inky.WIDTH, inky.HEIGHT), inky.WHITE)
+image = Image.new("RGB", (inky.WIDTH, inky.HEIGHT), PALETTE[inky.WHITE])
 overlay = Image.open(OVERLAY_IMAGE)
 draw = ImageDraw.Draw(image)
 os.chdir(os.path.dirname(sys.argv[0]))
@@ -148,16 +159,16 @@ if __name__ == "__main__":
     TIMENOW_POS = (inky.WIDTH - 1 - 1 - TIMENOW_SIZE_X, 1)
 
     draw.text(HUGE_WEATHER_POS, BACKGROUND_WEATHER, HUGE_WEATHER_COLOUR, ICON_FONT_HUGE)
-    draw.text(TIMENOW_POS, TIMENOW, inky.BLUE, TEXT_FONT_22)
-    draw.text(IN_TEMP_POS, IN_TEMP_TEXT, inky.BLACK, TEXT_FONT_50)
-    draw.text(OUT_TEMP_POS, OUT_TEMP_TEXT, inky.BLACK, TEXT_FONT_50)
-    draw.text(IN_HUM_POS, IN_HUM_TEXT, inky.BLACK, TEXT_FONT_36)
-    draw.text(OUT_HUM_POS, OUT_HUM_TEXT, inky.BLACK, TEXT_FONT_36)
-    draw.text(WEATHER_POS, weatherString, inky.RED, ICON_FONT)
-    draw.text(EXCHANGERATE_POS, "\u00A5" + str(round(float(RATE), 3)) + " to £1", inky.BLUE, TEXT_FONT_62)
-    draw.text(TIMENOW_POS, TIMENOW, inky.BLUE, TEXT_FONT_22)
+    draw.text(TIMENOW_POS, TIMENOW, PALETTE[inky.BLUE], TEXT_FONT_22)
+    draw.text(IN_TEMP_POS, IN_TEMP_TEXT, PALETTE[inky.BLACK], TEXT_FONT_50)
+    draw.text(OUT_TEMP_POS, OUT_TEMP_TEXT, PALETTE[inky.BLACK], TEXT_FONT_50)
+    draw.text(IN_HUM_POS, IN_HUM_TEXT, PALETTE[inky.BLACK], TEXT_FONT_36)
+    draw.text(OUT_HUM_POS, OUT_HUM_TEXT, PALETTE[inky.BLACK], TEXT_FONT_36)
+    draw.text(WEATHER_POS, weatherString, PALETTE[inky.RED], ICON_FONT)
+    draw.text(EXCHANGERATE_POS, "\u00A5" + str(round(float(RATE), 3)) + " to £1", PALETTE[inky.BLUE], TEXT_FONT_62)
+    draw.text(TIMENOW_POS, TIMENOW, PALETTE[inky.BLUE], TEXT_FONT_22)
 
-    #image.alpha_composite(overlay)
+    image.alpha_composite(overlay)
     inky.set_image(image)
     inky.show()
 
