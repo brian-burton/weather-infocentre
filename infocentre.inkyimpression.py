@@ -69,13 +69,16 @@ INDOOR_THERMO_ID = "659"
 
 # Font definitions
 
-ICON_FONT = ImageFont.truetype("Font-Awesome-5-Free-Solid-900.otf", 62)
-ICON_FONT_HUGE = ImageFont.truetype("Font-Awesome-5-Free-Solid-900.otf", 448)
+ICON_FONT_FILE = os.path.dirname(sys.argv[0]) + "/fonts/Font-Awesome-5-Free-Solid-900.otf"
+TEXT_FONT_FILE = os.path.dirname(sys.argv[0]) + "/fonts/NotoSansJP-Regular.otf"
 
-TEXT_FONT_22 = ImageFont.truetype("NotoSansJP-Regular.otf", 22)
-TEXT_FONT_36 = ImageFont.truetype("NotoSansJP-Regular.otf", 36)
-TEXT_FONT_50 = ImageFont.truetype("NotoSansJP-Regular.otf", 50)
-TEXT_FONT_62 = ImageFont.truetype("NotoSansJP-Regular.otf", 62)
+ICON_FONT = ImageFont.truetype(ICON_FONT_FILE, 62)
+ICON_FONT_HUGE = ImageFont.truetype(ICON_FONT_FILE, 448)
+
+TEXT_FONT_22 = ImageFont.truetype(TEXT_FONT_FILE, 22)
+TEXT_FONT_36 = ImageFont.truetype(TEXT_FONT_FILE, 36)
+TEXT_FONT_50 = ImageFont.truetype(TEXT_FONT_FILE, 50)
+TEXT_FONT_62 = ImageFont.truetype(TEXT_FONT_FILE, 62)
 
 # Pre-drawn background and top layer images
 
