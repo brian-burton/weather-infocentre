@@ -5,19 +5,9 @@ import sys
 import os
 import metofficekey_bb as metofficekey
 from inky.auto import auto
-from font_fredoka_one import FredokaOne
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 from time import sleep
-
-# Varables and devices
-
-inky = auto()
-xres, yres = inky.resolution
-image = Image.new("P", inky.resolution)
-draw = ImageDraw.Draw(image)
-os.chdir(os.path.dirname(sys.argv[0]))
-
 
 ##### Function defs #####
 
@@ -25,6 +15,7 @@ def parseWeather(data: list) -> list:
   """ take MetOffice weatherdata and return the first four future entries"""
   forecast = []
   whichday = 0
+  HOUR_IN_MINS = datetime.now().hour * 60
   for day in data:
     for entry in day['Rep']:
       # The forecast is laggy for the current day, so we need to discard past entries
@@ -76,19 +67,36 @@ DOMOTICZ_URL = 'http://domoticz/json.htm'
 OUTDOOR_THERMO_ID = "452"
 INDOOR_THERMO_ID = "659"
 
-SMALL_FONT = ImageFont.truetype(FredokaOne, 14)
-MED_FONT = ImageFont.truetype(FredokaOne, 28)
-LARGE_FONT = ImageFont.truetype(FredokaOne, 35)
-WEATHER_FONT = ImageFont.truetype("Font-Awesome-5-Free-Solid-900.otf", 20)
+# Font definitions
 
-IN_TEXT = "In"
-IN_TEXT_W, IN_TEXT_H = SMALL_FONT.getsize(IN_TEXT)
-OUT_TEXT = "Out"
-OUT_TEXT_W, OUT_TEXT_H = SMALL_FONT.getsize(OUT_TEXT)
+ICON_FONT = ImageFont.truetype("Font-Awesome-5-Free-Solid-900.otf", 62)
+ICON_FONT_HUGE = ImageFont.truetype("Font-Awesome-5-Free-Solid-900.otf", 448)
 
-HOUR_IN_MINS = datetime.now().hour * 60
+TEXT_FONT_22 = ImageFont.truetype("NotoSansJP-Regular.otf", 22)
+TEXT_FONT_36 = ImageFont.truetype("NotoSansJP-Regular.otf", 36)
+TEXT_FONT_50 = ImageFont.truetype("NotoSansJP-Regular.otf", 50)
+TEXT_FONT_62 = ImageFont.truetype("NotoSansJP-Regular.otf", 62)
+
+# Pre-drawn background and top layer images
+
+BASE_IMAGE = sys.argv[0] + "/images/weather-infocentre-background.png"
+OVERLAY_IMAGE = sys.argv[0] + "/images/weather-infocentre-overlay.png"
+
+# Known positions and custom colours of calculated text element
+
+IN_TEMP_POS = (82, 6)
+OUT_TEMP_POS = (82, 64)
+IN_HUM_POS = (245,6)
+OUT_HUM_POS = (245, 64)
+WEATHER_POS = (15, 168)
+EXCHANGERATE_POS = (15, 350)
+JPY_ARROW_POS = (556, 368)
+GBP_ARROW_POS = (556, 406)
+HUGE_WEATHER_COLOUR = (190, 190, 255)
+
+# Script run time
+
 TIMENOW = str(datetime.now().time()).split(".")[0]
-TIMENOW_W, TIMENOW_H = SMALL_FONT.getsize(TIMENOW)
 
 # https://www.metoffice.gov.uk/datapoint/support/documentation/code-definitions
 # This page defines the weather codes from 0-30, so it makes sense to me to create
@@ -96,13 +104,21 @@ TIMENOW_W, TIMENOW_H = SMALL_FONT.getsize(TIMENOW)
 # code corresponds to the weather type, W, returned by the API.
 WEATHERTYPE = buildWeatherTypes()
 
+# Varables and devices
+
+inky = auto()
+xres, yres = inky.resolution
+image = Image.open(BASE_IMAGE)
+overlay = Image.open(OVERLAY_IMAGE)
+draw = ImageDraw.Draw(image)
+os.chdir(os.path.dirname(sys.argv[0]))
+
+
 
 ########## The code itself
 
 if __name__ == "__main__":
   try:
-    draw.rectangle([(0,0),(xres-1,yres-1)],fill=inky.WHITE)
-    draw.rectangle([(1,1),(xres-2,yres-2)],outline=inky.RED)
     inTemp, inHumidity = getIndoorTempData()
     outTemp, outHumidity = getOutdoorTempData()
 
@@ -119,46 +135,28 @@ if __name__ == "__main__":
     with open(os.path.dirname(sys.argv[0]) + '/exchangerate.txt', "r") as f:
       RATE = f.read()
 
+    BACKGROUND_WEATHER = weatherString[0]
+
     IN_TEMP_TEXT = inTemp + '°C'
-    IN_TEMP_TEXT_W, IN_TEMP_TEXT_H = LARGE_FONT.getsize(IN_TEMP_TEXT)
     IN_HUM_TEXT = inHumidity + '%'
-    IN_HUM_TEXT_W, IN_HUM_TEXT_H = MED_FONT.getsize(IN_HUM_TEXT)
     OUT_TEMP_TEXT = outTemp + '°C'
-    OUT_TEMP_TEXT_W, OUT_TEMP_TEXT_H = LARGE_FONT.getsize(OUT_TEMP_TEXT)
     OUT_HUM_TEXT = outHumidity + '%'
-    OUT_HUM_TEXT_W, OUT_HUM_TEXT_H = MED_FONT.getsize(OUT_HUM_TEXT)
-    WTH_TEXT_W, WTH_TEXT_H = WEATHER_FONT.getsize(weatherString)
 
+    # Some sizes need calculating
+    HUGE_WEATHER_SIZE_X, HUGE_WEATHER_SIZE_Y = ICON_FONT_HUGE.getsize(BACKGROUND_WEATHER)
+    HUGE_WEATHER_POS = ((xres-HUGE_WEATHER_SIZE_X)/2, (yres-HUGE_WEATHER_SIZE_Y)/2)
+    TIMENOW_SIZE_X, TIMENOW_SIZE_Y = TEXT_FONT_22.getsize(TIMENOW)
+    TIMENOW_POS = (xres - 1 - 1 - TIMENOW_SIZE_X, 1)
 
-    in_out_w_max = max(IN_TEXT_W, OUT_TEXT_W)
-    temp_w_max = max(IN_TEMP_TEXT_W, OUT_TEMP_TEXT_W)
-    hum_w_max = max(IN_HUM_TEXT_W, OUT_HUM_TEXT_W)
-    in_text_x = 3
-    in_text_y = 3
-    temp_text_x = in_text_x + in_out_w_max + 3
-    out_text_x = 3
-    out_text_y = 3 + IN_TEMP_TEXT_H + 3
-    in_temp_text_y = 3
-    out_temp_text_y = out_text_y
-    hum_text_x = 211 - hum_w_max - 3
-    out_hum_text_y = 3
-    wth_text_x = 3
-    wth_text_y = out_text_y + OUT_TEMP_TEXT_H + 3
-    rate_text_x = 3
-    rate_text_y = wth_text_y + WTH_TEXT_H + 3
-    time_text_x = xres - 1 - 3 - TIMENOW_W
-    time_text_y = 3
+    draw.text(HUGE_WEATHER_POS, BACKGROUND_WEATHER, HUGE_WEATHER_COLOUR, ICON_FONT_HUGE)
+    draw.text(TIMENOW_POS, TIMENOW, inky.BLUE, TEXT_FONT_22)
+    draw.text(IN_TEMP_POS, IN_TEMP_TEXT, inky.BLACK, TEXT_FONT_50)
+    draw.text(OUT_TEMP_POS, OUT_TEMP_TEXT, inky.BLACK, TEXT_FONT_50)
+    draw.text(WEATHER_POS, weatherString, inky.RED, ICON_FONT)
+    draw.text(EXCHANGERATE_POS, "\u00A5" + str(round(float(RATE), 3)) + " to £1", inky.BLUE, TEXT_FONT_62)
+    draw.text((time_text_x, time_text_y), TIMENOW, inky.BLUE, TEXT_FONT_22)
 
-    draw.text((in_text_x,in_text_y), IN_TEXT, inky.BLACK, SMALL_FONT)
-    draw.text((temp_text_x, in_temp_text_y), IN_TEMP_TEXT, inky.BLACK, LARGE_FONT)
-    draw.text((out_text_x, out_text_y), OUT_TEXT, inky.BLACK, SMALL_FONT)
-    draw.text((temp_text_x, out_text_y), OUT_TEMP_TEXT, inky.BLACK, LARGE_FONT)
-    draw.text((hum_text_x, in_text_y), IN_HUM_TEXT, inky.BLACK, MED_FONT)
-    draw.text((hum_text_x, out_text_y), OUT_HUM_TEXT, inky.BLACK, MED_FONT)
-    draw.text((wth_text_x, wth_text_y), weatherString, inky.RED, WEATHER_FONT)
-    draw.text((rate_text_x, rate_text_y), "\u00A5" + str(round(float(RATE), 3)) + " to £1", inky.BLACK, LARGE_FONT)
-    draw.text((time_text_x, time_text_y), TIMENOW, inky.BLUE, SMALL_FONT)
-
+    image.paste(overlay)
     inky.set_image(image)
     inky.show()
 
