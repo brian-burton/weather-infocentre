@@ -105,6 +105,8 @@ PALETTE = [
     (255, 255, 255)
 ]
 
+SATURATION = 1.0
+
 # Script run time
 
 TIMENOW = str(datetime.now().time()).split(".")[0]
@@ -118,7 +120,7 @@ WEATHERTYPE = buildWeatherTypes()
 # Varables and devices
 
 inky = Inky()
-image = Image.new("RGB", (inky.WIDTH, inky.HEIGHT), PALETTE[inky.WHITE])
+image = Image.new("RGBA", (inky.WIDTH, inky.HEIGHT), PALETTE[inky.WHITE])
 overlay = Image.open(OVERLAY_IMAGE)
 draw = ImageDraw.Draw(image)
 os.chdir(os.path.dirname(sys.argv[0]))
@@ -169,7 +171,7 @@ if __name__ == "__main__":
     draw.text(TIMENOW_POS, TIMENOW, PALETTE[inky.BLUE], TEXT_FONT_22)
 
     image.alpha_composite(overlay)
-    inky.set_image(image)
+    inky.set_image(image, SATURATION)
     inky.show()
 
   except requests.exceptions.RequestException as err:
