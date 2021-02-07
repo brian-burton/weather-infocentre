@@ -35,7 +35,7 @@ def buildWeatherTypes() -> list:
   weatherTypeList = []
   for text in ["\uF186","\uF185","\uF6C3","\uF6C4","UNUSED","\uF75F","\uF75F","\uF0C2","\uF0C2","\uF73C","\uF743","\uF73D","\uF73D","\uF740","\uF740","\uF740","\uF73B","\uF73B","\uF73B","\uF73B","\uF73B","\uF73B","\uF2DC","\uF2DC","\uF2DC","\uF2DC","\uF2DC","\uF2DC","\uF0E7","\uF0E7","\uF0E7"]:
     tmp = {'text': text}
-    tmp['w'], tmp['h'] = WEATHER_FONT.getsize(text)
+    tmp['w'], tmp['h'] = ICON_FONT.getsize(text)
     weatherTypeList.append(tmp)
   return weatherTypeList
 
@@ -125,6 +125,7 @@ if __name__ == "__main__":
     # Get the data and whittle it down to the first four
     try:
       weatherData = parseWeather(requests.get(DATAPOINT_URL).json()['SiteRep']['DV']['Location']['Period'])
+      print(weatherData)
     except:
       weatherData = "????"
 
@@ -154,7 +155,7 @@ if __name__ == "__main__":
     draw.text(OUT_TEMP_POS, OUT_TEMP_TEXT, inky.BLACK, TEXT_FONT_50)
     draw.text(WEATHER_POS, weatherString, inky.RED, ICON_FONT)
     draw.text(EXCHANGERATE_POS, "\u00A5" + str(round(float(RATE), 3)) + " to £1", inky.BLUE, TEXT_FONT_62)
-    draw.text((time_text_x, time_text_y), TIMENOW, inky.BLUE, TEXT_FONT_22)
+    draw.text(TIMENOW_POS, TIMENOW, inky.BLUE, TEXT_FONT_22)
 
     image.paste(overlay)
     inky.set_image(image)
