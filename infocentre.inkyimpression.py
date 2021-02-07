@@ -4,7 +4,7 @@ import requests
 import sys
 import os
 import metofficekey_bb as metofficekey
-from inky.auto import auto
+from inky.inky_uc8159 import Inky
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 from time import sleep
@@ -106,9 +106,8 @@ WEATHERTYPE = buildWeatherTypes()
 
 # Varables and devices
 
-inky = auto()
-xres, yres = inky.resolution
-image = Image.open(BASE_IMAGE)
+inky = Inky()
+image = Image.new("RGB", (inky.WIDTH, inky.HEIGHT), inky.WHITE)
 overlay = Image.open(OVERLAY_IMAGE)
 draw = ImageDraw.Draw(image)
 os.chdir(os.path.dirname(sys.argv[0]))
@@ -125,7 +124,6 @@ if __name__ == "__main__":
     # Get the data and whittle it down to the first four
     try:
       weatherData = parseWeather(requests.get(DATAPOINT_URL).json()['SiteRep']['DV']['Location']['Period'])
-      print(weatherData)
     except:
       weatherData = "????"
 
@@ -145,19 +143,21 @@ if __name__ == "__main__":
 
     # Some sizes need calculating
     HUGE_WEATHER_SIZE_X, HUGE_WEATHER_SIZE_Y = ICON_FONT_HUGE.getsize(BACKGROUND_WEATHER)
-    HUGE_WEATHER_POS = ((xres-HUGE_WEATHER_SIZE_X)/2, (yres-HUGE_WEATHER_SIZE_Y)/2)
+    HUGE_WEATHER_POS = ((inky.WIDTH-HUGE_WEATHER_SIZE_X)/2, (inky.HEIGHT-HUGE_WEATHER_SIZE_Y)/2)
     TIMENOW_SIZE_X, TIMENOW_SIZE_Y = TEXT_FONT_22.getsize(TIMENOW)
-    TIMENOW_POS = (xres - 1 - 1 - TIMENOW_SIZE_X, 1)
+    TIMENOW_POS = (inky.WIDTH - 1 - 1 - TIMENOW_SIZE_X, 1)
 
     draw.text(HUGE_WEATHER_POS, BACKGROUND_WEATHER, HUGE_WEATHER_COLOUR, ICON_FONT_HUGE)
     draw.text(TIMENOW_POS, TIMENOW, inky.BLUE, TEXT_FONT_22)
     draw.text(IN_TEMP_POS, IN_TEMP_TEXT, inky.BLACK, TEXT_FONT_50)
     draw.text(OUT_TEMP_POS, OUT_TEMP_TEXT, inky.BLACK, TEXT_FONT_50)
+    draw.text(IN_HUM_POS, IN_HUM_TEXT, inky.BLACK, TEXT_FONT_36)
+    draw.text(OUT_HUM_POS, OUT_HUM_TEXT, inky.BLACK, TEXT_FONT_36)
     draw.text(WEATHER_POS, weatherString, inky.RED, ICON_FONT)
     draw.text(EXCHANGERATE_POS, "\u00A5" + str(round(float(RATE), 3)) + " to £1", inky.BLUE, TEXT_FONT_62)
     draw.text(TIMENOW_POS, TIMENOW, inky.BLUE, TEXT_FONT_22)
 
-    image.alpha_composite(overlay)
+    #image.alpha_composite(overlay)
     inky.set_image(image)
     inky.show()
 
