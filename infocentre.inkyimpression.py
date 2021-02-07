@@ -157,7 +157,7 @@ if __name__ == "__main__":
     draw.text(EXCHANGERATE_POS, "\u00A5" + str(round(float(RATE), 3)) + " to £1", inky.BLUE, TEXT_FONT_62)
     draw.text(TIMENOW_POS, TIMENOW, inky.BLUE, TEXT_FONT_22)
 
-    image.paste(overlay)
+    image.alpha_composite(overlay)
     inky.set_image(image)
     inky.show()
 
