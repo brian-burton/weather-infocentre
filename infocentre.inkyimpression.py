@@ -89,8 +89,8 @@ OVERLAY_IMAGE = os.path.dirname(sys.argv[0]) + "/images/weather-infocentre-overl
 
 IN_TEMP_POS = (82, 6)
 OUT_TEMP_POS = (82, 64)
-IN_HUM_POS = (245,6)
-OUT_HUM_POS = (245, 64)
+IN_HUM_POS = (255,6)
+OUT_HUM_POS = (255, 64)
 WEATHER_POS = (15, 168)
 EXCHANGERATE_POS = (15, 350)
 JPY_ARROW_POS = (556, 368)
